@@ -77,7 +77,8 @@ JOIN (SELECT * FROM assets10 ) a10
 
 SELECT ID, "rank", organizationName, country, revenue, profits, profits / revenue * 100 AS PrftRevPerc
 FROM PrimaryValues
-ORDER BY PrftRevPerc DESC;
+ORDER BY PrftRevPerc DESC
+LIMIT 10;
 
 -- 4
 -- Join table with MarketValues table 
@@ -105,11 +106,21 @@ SELECT DISTINCT country
 FROM PrimaryValues;
 
 -- 2
--- How many companies from a country is in the dataset? (proportion of companies by countries) (viz-bars)
+-- How many companies from a country is in the dataset? (viz-bars)
 
-SELECT country, COUNT(country)
+SELECT country, COUNT(country) AS 'count'
 FROM PrimaryValues
-GROUP BY country;
+GROUP BY country
+ORDER BY COUNT(country) DESC;
+
+-- 2.5
+-- Find percentile of companies by countries
+
+SELECT country, TRUNCATE((count / 998 * 100), 1) AS percentile 
+FROM (SELECT country, COUNT(country) AS 'count'
+FROM PrimaryValues
+GROUP BY country) AS subquery
+ORDER BY percentile  DESC;
 
 -- 3 
 -- Find the running sum of revenue after partitioning by country.
@@ -119,28 +130,28 @@ SUM(revenue) OVER (PARTITION BY country ORDER BY organizationName) RunningSum
 FROM PrimaryValues;
 
 -- 4
--- What is the most profitting countries among the top 50 profitting companies?  (viz-worldheatmap)
+-- What are the most profitting countries among the top 50 companies in revenue?  (viz-worldheatmap)
 
 -- solution with CTE
-WITH top50profitingcountry (country, profits) 
+WITH top50profitingcountry (country, profits, revenue) 
 AS 
-(SELECT country, profits
+(SELECT country, profits, revenue
 FROM PrimaryValues
-ORDER BY profits DESC
+ORDER BY revenue DESC
 LIMIT 50)
-SELECT country, COUNT(country) AS "count"
+SELECT country, SUM(profits) AS "sum_of_profits"
 FROM top50profitingcountry
 GROUP BY country
-ORDER BY count DESC;
+ORDER BY sum_of_profits DESC;
 
 -- solution with a subquery
-SELECT country, COUNT(country) AS count
-FROM (SELECT country
+SELECT country, SUM(profits) AS "sum_of_profits"
+FROM (SELECT country, profits, revenue
 FROM PrimaryValues
-ORDER BY profits DESC
-LIMIT 50) AS subquery_pm
+ORDER BY revenue DESC
+LIMIT 50) AS subquery_pm50
 GROUP BY country
-ORDER BY count DESC;
+ORDER BY sum_of_profits DESC;
 
 
 -- create view of the query above
@@ -149,9 +160,39 @@ SELECT country, COUNT(country) as count
 FROM (SELECT country
 FROM PrimaryValues
 ORDER BY profits DESC
-LIMIT 50) as subquery_pm
+LIMIT 50) AS subquery_pm
 GROUP BY country
 ORDER BY count DESC;
+
+-- 5
+-- In the table of most profitting 100 companies
+-- compare the 10 countries which have the biggest number of companies
+-- with the 10 countries which have the biggest number of profit in total (regardless of the number of companies the country have)
+
+-- biggest number of companies
+SELECT country, COUNT(country) AS count
+FROM (SELECT country, profits
+FROM PrimaryValues
+ORDER BY profits DESC
+LIMIT 100) AS subquery_pm100
+GROUP BY country
+ORDER BY count DESC
+LIMIT 10;
+
+-- biggest number of profit in total
+SELECT country, SUM(profits) AS total_profit
+FROM (SELECT country, profits
+FROM PrimaryValues
+ORDER BY profits DESC
+LIMIT 100) AS subquery_pm100
+GROUP BY country
+ORDER BY total_profit DESC
+LIMIT 10;
+
+-- Comment: 
+-- Only the first two countries secures their order in the both queries. 
+-- There are also countries like Brazil and Taiwan that are in the list of most profiting countries in total (second query),
+-- even though they have less number of companies in the table of biggest number of companies (first query).
 
 
 
