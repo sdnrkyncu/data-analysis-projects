@@ -73,9 +73,9 @@ JOIN (SELECT * FROM assets10 ) a10
 -- When we limit results to the top 30, we see three companies showing up in all.
 
 -- 3
--- find the proportion of profits from the revenue and see which companies make the most profit from its revenue (viz)
+-- find the percentile of profits from the revenue and see which companies make the most profit from its revenue (viz)
 
-SELECT ID, "rank", organizationName, country, revenue, profits, profits / revenue * 100 AS PrftRevPerc
+SELECT organizationName, country, revenue, profits, TRUNCATE((profits / revenue * 100), 0) AS PrftRevPerc
 FROM PrimaryValues
 ORDER BY PrftRevPerc DESC
 LIMIT 10;
