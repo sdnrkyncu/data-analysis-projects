@@ -81,7 +81,7 @@ ORDER BY PrftRevPerc DESC
 LIMIT 10;
 
 -- 4
--- Join table with MarketValues table 
+-- Join PrimaryValues table with MarketValues table 
 -- How many times market value do companies have than their revenue?
 
 SELECT pm.organizationName, pm.revenue, mv.marketValue, mv.marketValue / pm.revenue AS mv_over_r
@@ -155,8 +155,8 @@ ORDER BY sum_of_profits DESC;
 
 
 -- create view of the query above
-CREATE VIEW top50profitingcountry as
-SELECT country, COUNT(country) as count
+CREATE VIEW top50profitingcountry AS
+SELECT country, COUNT(country) AS 'count'
 FROM (SELECT country
 FROM PrimaryValues
 ORDER BY profits DESC
@@ -170,7 +170,7 @@ ORDER BY count DESC;
 -- with the 10 countries which have the biggest number of profit in total (regardless of the number of companies the country have)
 
 -- biggest number of companies
-SELECT country, COUNT(country) AS count
+SELECT country, COUNT(country) AS 'count'
 FROM (SELECT country, profits
 FROM PrimaryValues
 ORDER BY profits DESC
