@@ -1,9 +1,11 @@
 -- Exploration of LargestCompanies database
 
+-- See Tableau visualisations: https://public.tableau.com/app/profile/sudenur.koyuncu/viz/LargestCompanies_17140754034800/Dashboard1
+
 -- Start by exploring TopCompanies table
 USE LargestCompanies;
 
--- The type of the prices columns were checked and all of them are integer values.
+-- The types of the prices columns were checked and all of them are integer values.
 -- However, they are lack of primary keys.
 
 ALTER TABLE PrimaryValues
@@ -23,7 +25,7 @@ FROM PrimaryValues;
 
 -- COMPANY LEVEL
 -- 1
--- find the top 10 companies in terms of revenue
+-- Find the top 10 companies in terms of revenue.
 
 SELECT *
 FROM PrimaryValues
@@ -31,7 +33,8 @@ ORDER BY revenue DESC
 LIMIT 10;
 
 -- 2
--- Repeat the same query above for all the three features and create a table from them to see if any company shows up in all the top 10 lists. 
+-- Repeat the same query above for all the three features,
+-- and create a table from them to see if any company shows up in all the top 10 lists. 
 
 -- create table for top 10 companies in revenue
 DROP TABLE IF EXISTS LargestCompanies.revenue10;
@@ -73,7 +76,7 @@ JOIN (SELECT * FROM assets10 ) a10
 -- When we limit results to the top 30, we see three companies showing up in all.
 
 -- 3
--- find the percentile of profits from the revenue and see which companies make the most profit from its revenue (viz)
+-- Find the percentile of profits from the revenue and see which companies make the most profit from their revenues. (viz)
 
 SELECT organizationName, country, revenue, profits, TRUNCATE((profits / revenue * 100), 0) AS PrftRevPerc
 FROM PrimaryValues
@@ -81,7 +84,7 @@ ORDER BY PrftRevPerc DESC
 LIMIT 10;
 
 -- 4
--- Join PrimaryValues table with MarketValues table 
+-- Join PrimaryValues table with MarketValues table.
 -- How many times market value do companies have than their revenue?
 
 SELECT pm.organizationName, pm.revenue, mv.marketValue, mv.marketValue / pm.revenue AS mv_over_r
@@ -89,7 +92,9 @@ FROM PrimaryValues pm
 JOIN MarketValues mv ON pm.ID = mv.ID
 ORDER BY mv_over_r DESC;
 
--- Compare this table with the top 10 countries in market value
+-- 4.5
+-- Compare this table with the top 10 countries in market value.
+
 -- top 10 countries in market value
 SELECT pm.organizationName, mv.marketValue
 FROM MarketValues mv
@@ -106,7 +111,7 @@ SELECT DISTINCT country
 FROM PrimaryValues;
 
 -- 2
--- How many companies from a country is in the dataset? (viz-bars)
+-- How many companies from a country is in the dataset? (viz)
 
 SELECT country, COUNT(country) AS 'count'
 FROM PrimaryValues
@@ -114,7 +119,7 @@ GROUP BY country
 ORDER BY COUNT(country) DESC;
 
 -- 2.5
--- Find percentile of companies by countries
+-- Find percentile of companies by countries.
 
 SELECT country, TRUNCATE((count / 998 * 100), 1) AS percentile 
 FROM (SELECT country, COUNT(country) AS 'count'
@@ -130,7 +135,7 @@ SUM(revenue) OVER (PARTITION BY country ORDER BY organizationName) RunningSum
 FROM PrimaryValues;
 
 -- 4
--- What are the most profitting countries among the top 50 companies in revenue?  (viz-worldheatmap)
+-- What are the most profitting countries among the top 50 companies in revenue? (viz)
 
 -- solution with CTE
 WITH top50profitingcountry (country, profits, revenue) 
@@ -153,7 +158,6 @@ LIMIT 50) AS subquery_pm50
 GROUP BY country
 ORDER BY sum_of_profits DESC;
 
-
 -- create view of the query above
 CREATE VIEW top50profitingcountry AS
 SELECT country, COUNT(country) AS 'count'
@@ -165,7 +169,7 @@ GROUP BY country
 ORDER BY count DESC;
 
 -- 5
--- In the table of most profitting 100 companies
+-- In the table of most profitting 100 companies,
 -- compare the 10 countries which have the biggest number of companies
 -- with the 10 countries which have the biggest number of profit in total (regardless of the number of companies the country have)
 
