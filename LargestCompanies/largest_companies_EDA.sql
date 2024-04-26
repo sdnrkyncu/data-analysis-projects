@@ -2,7 +2,6 @@
 
 -- See Tableau visualisations: https://public.tableau.com/app/profile/sudenur.koyuncu/viz/LargestCompanies_17140754034800/Dashboard1
 
--- Start by exploring TopCompanies table
 USE LargestCompanies;
 
 -- The types of the prices columns were checked and all of them are integer values.
